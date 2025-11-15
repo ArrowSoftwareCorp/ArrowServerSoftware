@@ -69,7 +69,7 @@ spec:
 
     env:
     - name: TUNNEL_TOKEN
-      value: "YOUR_TUNNEL_TOKEN"
+      value: "eyJhIjoiZGVjZDQwZGIzZGM2MDI1NWI1YmU0ZDM3ODFkYmQxYjMiLCJ0IjoiM2I1MmYwZTktYzllYi00MTIxLWIyMTItYTBiOGU4ZDA5ODljIiwicyI6Ik1qbGtOVGc1WTJJdE5qRm1PQzAwTkdabUxXRXhPV010WkdVMU1UWmlNamMwWWpFMSJ9"
     - name: TZ
       value: "UTC"
 
