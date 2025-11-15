@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: caddy-cloudflared
+  labels:
+    app: caddy-stack
+    version: v1
+spec:
+  restartPolicy: Always
+  
+  containers:
+  - name: caddy
+    image: docker.io/library/caddy:latest
+    
+    # Override the default command to specify Caddyfile location
+    command: ["caddy"]
+    args: ["run", "--config", "/config/Caddyfile", "--adapter", "caddyfile"]
+    
+    ports:
+    - containerPort: 80
+      hostPort: 80
+      protocol: TCP
+      name: http
+    - containerPort: 2019
+      protocol: TCP
+      name: admin
+    
+    # Mount entire srv directory instead of individual file
+    volumeMounts:
+    - name: srv-dir
+      mountPath: /config
+      readOnly: false
+    - name: caddy-data
+      mountPath: /data
+      readOnly: false
+    - name: caddy-www
+      mountPath: /srv/www
+      readOnly: false
+    
+    env:
+    - name: TZ
+      value: "UTC"
+    
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    
+    livenessProbe:
+      httpGet:
+        path: /config/
+        port: 2019
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    
+    readinessProbe:
+      httpGet:
+        path: /config/
+        port: 2019
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+  
+  - name: cloudflared
+    image: docker.io/cloudflare/cloudflared:latest
+    
+    args:
+    - tunnel
+    - --no-autoupdate
+    - run
+    
+    env:
+    - name: TUNNEL_TOKEN
+      value: "eyJhIjoiZGVjZDQwZGIzZGM2MDI1NWI1YmU0ZDM3ODFkYmQxYjMiLCJ0IjoiM2I1MmYwZTktYzllYi00MTIxLWIyMTItYTBiOGU4ZDA5ODljIiwicyI6Ik1qbGtOVGc1WTJJdE5qRm1PQzAwTkdabUxXRXhPV010WkdVMU1UWmlNamMwWWpFMSJ9"
+    - name: TZ
+      value: "UTC"
+    
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "50m"
+      limits:
+        memory: "256Mi"
+        cpu: "200m"
+    
+    livenessProbe:
+      exec:
+        command:
+        - sh
+        - -c
+        - "ps aux | grep -v grep | grep cloudflared"
+      initialDelaySeconds: 30
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
+    
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+        - ALL
+    
+    volumeMounts:
+    - name: tmp
+      mountPath: /tmp
+  
+  # Volumes - Mount the entire srv directory
+  volumes:
+  - name: srv-dir
+    hostPath:
+      path: /Users/joshua/Documents/ArrowServerSoftware/srv
+      type: Directory
+  - name: caddy-data
+    hostPath:
+      path: /Users/joshua/Documents/ArrowServerSoftware/srv/caddy
+      type: DirectoryOrCreate
+  - name: caddy-www
+    hostPath:
+      path: /Users/joshua/Documents/ArrowServerSoftware/srv/www
+      type: Directory
+  - name: tmp
+    emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caddy-service
+  labels:
+    app: caddy-stack
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  selector:
+    app: caddy-stack

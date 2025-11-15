@@ -1,0 +1,16 @@
+{
+    admin off
+    auto_https off
+    http_port 80
+}
+
+http://arrowsoftware.net {
+    root * /srv/www/arrowsoftware.net
+    file_server
+    encode gzip
+    
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+    }
+}
