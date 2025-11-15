@@ -17,8 +17,8 @@ spec:
     args: ["run", "--config", "/config/Caddyfile", "--adapter", "caddyfile"]
 
     ports:
-    - containerPort: 80
-      hostPort: 80
+    - containerPort: 80        # Caddy still listens internally on 80
+      hostPort: 1221           # Exposed externally on 1221
       protocol: TCP
       name: http
     - containerPort: 2019
@@ -125,8 +125,8 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 80
-    targetPort: 80
+  - port: 1221          # Service port exposed
+    targetPort: 80      # Still routes to container’s port 80
     protocol: TCP
     name: http
   selector:
