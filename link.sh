@@ -1,13 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
-# Remove existing /srv if it's a dir (be careful!)
-if [ -d /srv ] && [ ! -L /srv ]; then
-  echo "⚠️ /srv already exists as a directory. Remove it first if you want a symlink."
+# Ensure ./srv exists
+if [ ! -d ./srv ]; then
+  echo "❌ ./srv directory not found in current path"
+  exit 1
+fi
+
+# Remove existing /serv if it's a dir (not a symlink)
+if [ -d /serv ] && [ ! -L /serv ]; then
+  echo "⚠️ /serv already exists as a directory. Remove it first if you want a symlink."
   exit 1
 fi
 
 # Create symlink
-sudo ln -s "$(pwd)/srv" /srv
+sudo ln -s "$(pwd)/srv" /serv
 
-echo "✅ Linked /srv → $(pwd)/srv"
+echo "✅ Linked /serv → $(pwd)/srv"

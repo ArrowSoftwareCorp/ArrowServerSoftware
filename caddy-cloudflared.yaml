@@ -7,8 +7,6 @@ metadata:
     version: v1
 spec:
   restartPolicy: Always
-
-  # Restrict to Linux nodes
   nodeSelector:
     kubernetes.io/os: linux
   
@@ -28,12 +26,12 @@ spec:
       name: admin
 
     volumeMounts:
-    - name: srv-dir
+    - name: serv-dir
       mountPath: /config
     - name: caddy-data
       mountPath: /data
     - name: caddy-www
-      mountPath: /srv/www
+      mountPath: /serv/www
 
     env:
     - name: TZ
@@ -71,7 +69,7 @@ spec:
 
     env:
     - name: TUNNEL_TOKEN
-      value: "eyJhIjoiZGVjZDQwZGIzZGM2MDI1NWI1YmU0ZDM3ODFkYmQxYjMiLCJ0IjoiM2I1MmYwZTktYzllYi00MTIxLWIyMTItYTBiOGU4ZDA5ODljIiwicyI6Ik1qbGtOVGc1WTJJdE5qRm1PQzAwTkdabUxXRXhPV010WkdVMU1UWmlNamMwWWpFMSJ9"
+      value: "YOUR_TUNNEL_TOKEN"
     - name: TZ
       value: "UTC"
 
@@ -102,17 +100,17 @@ spec:
       mountPath: /tmp
 
   volumes:
-  - name: srv-dir
+  - name: serv-dir
     hostPath:
-      path: /srv
+      path: /serv
       type: Directory
   - name: caddy-data
     hostPath:
-      path: /srv/caddy
+      path: /serv/caddy
       type: DirectoryOrCreate
   - name: caddy-www
     hostPath:
-      path: /srv/www
+      path: /serv/www
       type: Directory
   - name: tmp
     emptyDir: {}
